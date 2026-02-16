@@ -111,8 +111,7 @@ ica.save(os.path.join('out_dir', 'ica.fif'), overwrite=True)
 print(f'ICA saved to out_dir/ica.fif')
 
 # == PLOT COMPONENTS TOPOGRAPHY ==
-fig = plt.figure(figsize=(15, 8))
-ica.plot_components(show=False)
+fig = ica.plot_components(show=False)
 components_fig_path = os.path.join('out_figs', 'components_topo.png')
 components_base64 = save_figure_with_base64(fig, components_fig_path, 
                                              dpi_file=150, dpi_base64=80)

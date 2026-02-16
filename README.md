@@ -1,57 +1,80 @@
-# ICA initialize and fit
-
+# ICA Fitting on Epoched Data
 
 [![Abcdspec-compliant](https://img.shields.io/badge/ABCD_Spec-v1.1-green.svg)](https://github.com/brain-life/abcd-spec)
 [![Run on Brainlife.io](https://img.shields.io/badge/Brainlife-bl.app.761-blue.svg)](https://doi.org/10.25663/brainlife.app.761)
 
-Brainlife App to compute ICA object using `mne.preprocessing.ICA` and `ica.fit()`.
+Brainlife App to compute Independent Component Analysis (ICA) on epoched MEG/EEG data using MNE-Python's `ICA.fit()` method.
 
+## Description
 
-1) Input file is:
-    * `meg/epo/fif` meg epoched data file
-    
-2) Input parameters:
+This app performs Independent Component Analysis (ICA) decomposition on epoched MEG/EEG data. ICA is a blind source separation technique that decomposes multivariate signals into independent non-Gaussian components. It is particularly useful for artifact removal from neuroimaging data.
 
+The app:
+- Loads MNE-compatible epoched data in FIF format
+- Applies optional bandpass filtering before ICA fitting
+- Fits the ICA decomposition using the specified algorithm
+- Generates comprehensive visualizations of ICA components
+- Creates an interactive HTML report for quality control
 
-    * `n_components` Number of principal components (from the pre-whitening PCA step) that are passed to the ICA algorithm during fitting.
-    * `l_freq` Low frequency cut-off for (recommended) high-pass filtering before ICA. default is None (no high-pass filtering), but it is advisable to high-pass filter the data for best ICA decomposition.
-    * `method` The ICA method to use in the fit method. Use the fit_params argument to set additional parameters. Specifically, if you want Extended   Infomax, set method='infomax' and fit_params=dict(extended=True) (this also works for method='picard'). Defaults to 'fastica'. 
-    * `noise_cov` Noise covariance used for pre-whitening. If None (default), channels are scaled to unit variance ("z-standardized") as a group by channel type prior to the whitening by PCA.
-    * `eog_ch` EOG channel to be used to detect EOG events, create epochs and overlay with the same epochs after rejecting ICA components highly correlated with the channel. If no channel is provided, MNE will try to guess, and issue an error if no EOG channel is found.
-    * `ecg_ch` ECG channel to be used to detect ECG events, create epochs and overlay with the same epochs after rejecting ICA components highly correlated with the channel. If no channel is provided, MNE will try to guess, and issue an error if no ECG channel is found.
-    * `random_state` A seed for the NumPy random number generator (RNG). If None (default), the seed will be obtained from the operating system (see RandomState for details), meaning it will most likely produce different output every time this function or method is run. To achieve reproducible results, pass a value here to explicitly initialize the RNG with a defined state.
-    * `max_iter` Maximum number of iterations during fit. If 'auto', it will set maximum iterations to 1000 for 'fastica' and to 500 for 'infomax' or 'picard'. The actual number of iterations it took ICA.fit() to complete will be stored in the n_iter_ attribute.
-    * `allow_ref_meg` Allow ICA on MEG reference channels. Defaults to False.
+## Inputs
 
+- **epo**: Path to MNE epochs data file in FIF format (.fif)
 
-3) Ouput files are:
-    * `ica/fif` ica object file
-    * a plots of the ICA components' topographies and properties
-    * a html report showing the original and cleaned signal after eventual exclusion of components based on correlation with EOG and ECG channels.
-   
+## Outputs
 
-## Authors
-- Maximilien Chaumon(maximilien.chaumon@icm-institute.org)
+- **out_dir/ica.fif**: ICA decomposition object that can be applied to new data
+- **out_figs/components_topo.png**: Topographic plot of all ICA components
+- **out_figs/component_*.png**: Detailed properties for selected individual components
+- **out_report/report_ica.html**: Interactive HTML report with component information
+- **product.json**: Metadata file for Brainlife.io interface
 
-## Citations
+## Configuration Parameters
 
-*- brainlife.io Publishing and Apps:*
+All parameters are specified in `config.json`:
 
-Avesani, P., McPherson, B., Hayashi, S. et al. **The open diffusion data derivatives, brain data upcycling via integrated publishing of derivatives and reproducible open cloud services**. Sci Data 6, 69 (2019). https://doi.org/10.1038/s41597-019-0073-y
+- **n_components** (integer, default: 20): Number of ICA components to estimate. Typically 20-30 for MEG/EEG data.
+- **method** (string, default: 'fastica'): ICA algorithm to use. Options: 'fastica', 'picard', 'infomax', 'extended-infomax'
+- **max_iter** (integer or 'auto', default: 'auto'): Maximum number of iterations during fitting
+- **allow_ref_meg** (boolean, default: false): Whether to include MEG reference channels in ICA decomposition
+- **noise_cov** (string, optional): Path to noise covariance matrix for pre-whitening. If empty, channels are z-standardized
+- **random_state** (integer, optional): Random seed for reproducibility. If omitted, results will vary
+- **fit_params** (string, optional): Python dictionary string of additional parameters for the ICA algorithm (e.g., "dict(extended=True)" for extended Infomax)
+- **l_freq** (float, optional): High-pass filter cutoff frequency (Hz). Recommended: 1-2 Hz
+- **h_freq** (float, optional): Low-pass filter cutoff frequency (Hz). Recommended: 80-100 Hz
+- **picks_to_plot** (integer, default: 5): Number of individual components to show detailed plots for
 
-*- MNE-Python package:* 
+## Usage
 
-Gramfort A, Luessi M, Larson E, Engemann DA, Strohmeier D, Brodbeck C, Goj R, Jas M, Brooks T, Parkkonen L, and Hämäläinen MS.  **MEG and EEG data analysis with MNE-Python**. Frontiers in Neuroscience, 7(267):1–13, 2013. https://doi.org/10.3389/fnins.2013.00267
+The app is typically run on the Brainlife.io platform through the web interface. To run locally:
 
-## Funding Acknowledgement
-brainlife.io is publicly funded and for the sustainability of the project it is helpful to Acknowledge the use of the platform. We kindly ask that you acknowledge the funding below in your publications and code reusing this code.
+```bash
+python main.py
+```
 
-[![NSF-BCS-1734853](https://img.shields.io/badge/NSF_BCS-1734853-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1734853)
-[![NSF-BCS-1636893](https://img.shields.io/badge/NSF_BCS-1636893-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1636893)
-[![NSF-ACI-1916518](https://img.shields.io/badge/NSF_ACI-1916518-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1916518)
-[![NSF-IIS-1912270](https://img.shields.io/badge/NSF_IIS-1912270-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1912270)
-[![NIH-NIBIB-R01EB030896](https://img.shields.io/badge/NIH_NIBIB-R01EB030896-green.svg)](https://grantome.com/grant/NIH/R01-EB030896-01)
+The `main.py` script reads the `config.json` file to get all parameters and data paths.
 
+## Technical Details
 
-#### MIT Copyright (c) 2023 brainlife.io The University of Texas at Austin and Indiana University
+### ICA Algorithms
+
+- **fastica**: Fast ICA algorithm (default), typically fastest
+- **picard**: Preconditioned ICA via Deflation, often more stable
+- **infomax**: Infomax ICA algorithm
+- **extended-infomax**: Extended Infomax (better for sub-Gaussian components)
+
+### Pre-filtering
+
+ICA typically benefits from high-pass filtering before fitting (recommended 1-2 Hz) to remove slow drifts. The app applies optional bandpass filtering specified by `l_freq` and `h_freq`.
+
+### Component Selection
+
+The number of components should be chosen based on:
+- Data dimensionality and number of channels
+- Available computational resources
+- Typical values: 20-30 for full MEG arrays, 15-20 for reduced arrays or EEG
+
+### Pre-whitening
+
+Channels are pre-whitened using PCA before ICA fitting. Optional noise covariance can be specified for improved pre-whitening.
+
 

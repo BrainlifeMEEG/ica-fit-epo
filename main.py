@@ -4,14 +4,14 @@ Compute ICA decomposition on epoched MEG/EEG data.
 This app fits an ICA decomposition to epoched MEG/EEG data, with optional filtering.
 It saves the ICA object, visualizes components, and generates a comprehensive QC report.
 
-Inputs:
+Input:
     - epo: Path to MNE epochs .fif file
     - n_components: Number of ICA components to estimate
     - method: ICA method ('fastica', 'picard', 'infomax', etc.)
     - l_freq/h_freq: Optional bandpass filtering parameters
     - picks_to_plot: Number of components to show detailed plots for
 
-Outputs:
+Output:
     - out_dir/ica.fif: ICA decomposition object
     - out_figs/components_topo.png: Topographic plot of ICA components
     - out_figs/component_*.png: Detailed properties for selected components
@@ -19,9 +19,12 @@ Outputs:
     - product.json: Metadata about ICA decomposition
 """
 
-# Copyright (c) 2020 brainlife.io
+# Copyright (c) 2026 brainlife.io
 #
 # This app computes ICA decomposition on MNE epoched data
+#
+# Authors:
+# - Maximilien Chaumon (https://github.com/dnacombo)
 
 import sys
 import os
@@ -39,7 +42,8 @@ from brainlife_utils import (
     ensure_output_dirs,
     create_product_json,
     add_info_to_product,
-    add_image_to_product
+    add_image_to_product,
+    save_figure_with_base64
 )
 
 # Set up matplotlib for headless execution
@@ -56,9 +60,12 @@ fname = config['epo']
 epo = mne.read_epochs(fname, preload=True)
 
 # == OPTIONAL FILTERING ==
+product_items = []
+
 if config.get('l_freq') is not None and config.get('h_freq') is not None:
     epo.filter(l_freq=config['l_freq'], h_freq=config['h_freq'])
-    add_info_to_product(f'Applied bandpass filter: {config["l_freq"]}-{config["h_freq"]} Hz')
+    filter_msg = f'Applied bandpass filter: {config["l_freq"]}-{config["h_freq"]} Hz'
+    add_info_to_product(product_items, filter_msg)
 
 # == PARSE FIT PARAMETERS ==
 fit_params = None
@@ -90,24 +97,27 @@ ica = ICA(**ica_params)
 # == FIT ICA ==
 ica.fit(epo)
 print(f'ICA fitted on {len(epo)} epochs with {ica.n_components} components')
+fit_msg = f'ICA fitted on {len(epo)} epochs with {ica.n_components} components'
+add_info_to_product(product_items, fit_msg, 'success')
 
 # == PRINT EXPLAINED VARIANCE ==
 explained_var_ratio = ica.get_explained_variance_ratio(epo)
 for channel_type, ratio in explained_var_ratio.items():
     msg = f'Fraction of {channel_type} variance explained by all components: {ratio:.4f}'
     print(msg)
-    add_info_to_product(msg)
+    add_info_to_product(product_items, msg)
 
 # == SAVE ICA ==
 ica.save(os.path.join('out_dir', 'ica.fif'), overwrite=True)
 print(f'ICA saved to out_dir/ica.fif')
 
 # == PLOT COMPONENTS TOPOGRAPHY ==
-plt.figure(figsize=(15, 8))
+fig = plt.figure(figsize=(15, 8))
 ica.plot_components(show=False)
 components_fig_path = os.path.join('out_figs', 'components_topo.png')
-plt.savefig(components_fig_path, dpi=150)
-plt.close()
+components_base64 = save_figure_with_base64(fig, components_fig_path, 
+                                             dpi_file=150, dpi_base64=80)
+plt.close(fig)
 
 # == PLOT DETAILED COMPONENT PROPERTIES ==
 picks_to_plot = config.get('picks_to_plot', 5)
@@ -120,13 +130,16 @@ for i, f in enumerate(fs):
 # == CREATE REPORT ==
 report = mne.Report(title='ICA Fitting Report (Epochs)')
 report.add_ica(ica, 'ICA Decomposition', inst=epo)
-report.save(os.path.join('out_report', 'report_ica.html'), overwrite=True)
-print('Report saved to out_report/report_ica.html')
+report_path = os.path.join('out_report', 'report_ica.html')
+report.save(report_path, overwrite=True)
+print(f'Report saved to {report_path}')
 
 # == CREATE PRODUCT.JSON ==
-create_product_json()
-add_image_to_product(components_fig_path, 'ICA Components')
-add_info_to_product(f'ICA fitted on {len(epo)} epochs with {ica.n_components} components', 'success')
+add_image_to_product(product_items, 'ICA Components', base64_data=components_base64)
+add_info_to_product(product_items, 
+                    f'ICA decomposition successfully computed and saved', 
+                    'success')
+create_product_json(product_items)
 
 
 

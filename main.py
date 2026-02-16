@@ -9,13 +9,12 @@ Input:
     - n_components: Number of ICA components to estimate
     - method: ICA method ('fastica', 'picard', 'infomax', etc.)
     - l_freq/h_freq: Optional bandpass filtering parameters
-    - picks_to_plot: Number of components to show detailed plots for
 
 Output:
     - out_dir/ica.fif: ICA decomposition object
     - out_figs/components_topo.png: Topographic plot of ICA components
-    - out_figs/component_*.png: Detailed properties for selected components
-    - out_report/report_ica.html: QC report with component analysis
+    - out_figs/component_*.png: Detailed properties
+    - out_report/report_ica.html: htmleport with component analysis
     - product.json: Metadata about ICA decomposition
 """
 
@@ -62,7 +61,7 @@ epo = mne.read_epochs(fname, preload=True)
 # == OPTIONAL FILTERING ==
 product_items = []
 
-if config.get('l_freq') is not None and config.get('h_freq') is not None:
+if config.get('l_freq') is not None or config.get('h_freq') is not None:
     epo.filter(l_freq=config['l_freq'], h_freq=config['h_freq'])
     filter_msg = f'Applied bandpass filter: {config["l_freq"]}-{config["h_freq"]} Hz'
     add_info_to_product(product_items, filter_msg)
@@ -77,9 +76,9 @@ if config.get('fit_params') is not None:
 
 # == SET UP ICA ==
 ica_params = {
-    'n_components': int(config.get('n_components', 20)),
-    'random_state': config.get('random_state', 42),
-    'method': config.get('method', 'fastica'),
+    'n_components': int(config.get('n_components')),
+    'random_state': config.get('random_state'),
+    'method': config.get('method'),
 }
 
 # Add optional parameters
@@ -120,8 +119,7 @@ components_base64 = save_figure_with_base64(fig, components_fig_path,
 plt.close(fig)
 
 # == PLOT DETAILED COMPONENT PROPERTIES ==
-picks_to_plot = config.get('picks_to_plot', 5)
-fs = ica.plot_properties(epo, picks=list(range(min(picks_to_plot, ica.n_components))), show=False)
+fs = ica.plot_properties(epo, show=False)
 for i, f in enumerate(fs):
     comp_fig_path = os.path.join('out_figs', f'component_{i:02d}.png')
     f.savefig(comp_fig_path, dpi=150)

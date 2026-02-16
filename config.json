@@ -1,5 +1,5 @@
 {
-  "epo": "/network/lustre/iss02/cenir/analyse/meeg/BRAINLIFE/datasets/meg-epo.fif",
+  "epo": "/network/iss/cenir/analyse/meeg/BRAINLIFE/datasets/meg-epo.fif",
   "n_components": 15,
   "method": "infomax",
   "max_iter": "auto",
@@ -7,9 +7,8 @@
   "noise_cov": "",
   "random_state": 42,
   "fit_params": "dict(extended=True)",
-  "l_freq": 1.0,
-  "h_freq": 80.0,
-  "picks_to_plot": 5
+  "l_freq": null,
+  "h_freq": 80.0
 }
 
 

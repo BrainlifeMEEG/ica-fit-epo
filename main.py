@@ -135,7 +135,7 @@ print(f'Report saved to {report_path}')
 add_image_to_product(product_items, 'ICA Components', base64_data=components_base64)
 add_info_to_product(product_items, 
                     f'ICA decomposition successfully computed and saved', 
-                    'success')
+                    msg_type='success')
 create_product_json(product_items)
 
 

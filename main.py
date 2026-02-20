@@ -18,6 +18,7 @@ Output:
     - product.json: Metadata about ICA decomposition
 """
 
+
 # Copyright (c) 2026 brainlife.io
 #
 # This app computes ICA decomposition on MNE epoched data
@@ -113,9 +114,21 @@ print(f'ICA saved to out_dir/ica.fif')
 # == PLOT COMPONENTS TOPOGRAPHY ==
 fig = ica.plot_components(show=False)
 components_fig_path = os.path.join('out_figs', 'components_topo.png')
-components_base64 = save_figure_with_base64(fig, components_fig_path, 
-                                             dpi_file=150, dpi_base64=80)
-plt.close(fig)
+components_base64 = []
+if isinstance(fig, list):
+    # If multiple figures are returned, save them all and create a composite image
+    components_base64.extend(
+        save_figure_with_base64(
+            f,
+            os.path.join('out_figs', f'components_topo_{i:02d}.png'),
+            dpi_file=150,
+            dpi_base64=80,
+        )
+        for i, f in enumerate(fig)
+    )
+else:
+    components_base64.append(save_figure_with_base64(fig, components_fig_path, 
+                                             dpi_file=150, dpi_base64=80))
 
 # == PLOT DETAILED COMPONENT PROPERTIES ==
 fs = ica.plot_properties(epo, show=False)
@@ -132,9 +145,10 @@ report.save(report_path, overwrite=True)
 print(f'Report saved to {report_path}')
 
 # == CREATE PRODUCT.JSON ==
-add_image_to_product(product_items, 'ICA Components', base64_data=components_base64)
+for component_base64 in components_base64:
+    add_image_to_product(product_items, 'ICA Components', base64_data=component_base64)
 add_info_to_product(product_items, 
-                    f'ICA decomposition successfully computed and saved', 
+                    'ICA decomposition successfully computed and saved', 
                     msg_type='success')
 create_product_json(product_items)
 

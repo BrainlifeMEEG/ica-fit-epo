@@ -77,7 +77,7 @@ if config.get('fit_params') is not None:
 
 # == SET UP ICA ==
 ica_params = {
-    'n_components': int(config.get('n_components', None)),
+    'n_components': config.get('n_components'),
     'random_state': config.get('random_state'),
     'method': config.get('method'),
 }

@@ -142,8 +142,10 @@ report.save(report_path, overwrite=True)
 print(f'Report saved to {report_path}')
 
 # == CREATE PRODUCT.JSON ==
-for component_base64 in components_base64:
-    add_image_to_product(product_items, 'ICA Components', base64_data=component_base64)
+add_image_to_product(product_items, 'ICA Components', base64_data=components_base64[0])
+
+if len(components_base64) > 1:
+    add_info_to_product(product_items, f'Additional ICA components but not shown here. See figures in out_figs/ for all {ica.n_components} components.', msg_type='info')
     
 add_info_to_product(product_items, 
                     'ICA decomposition successfully computed and saved', 

@@ -75,9 +75,15 @@ if config.get('fit_params') is not None:
     except Exception as e:
         print(f'Warning: Could not parse fit_params: {e}')
 
+# == CALCULATE DEFAULT N_COMPONENTS ==
+# Default to minimum of 50 and the rank of the data
+rank = mne.compute_rank(epo, rank = 'info')
+total_rank = sum(rank.values())  
+default_n_components = min(50, total_rank)
+
 # == SET UP ICA ==
 ica_params = {
-    'n_components': config.get('n_components'),
+    'n_components': config.get('n_components', default_n_components),
     'random_state': config.get('random_state'),
     'method': config.get('method'),
 }
@@ -96,8 +102,8 @@ ica = ICA(**ica_params)
 
 # == FIT ICA ==
 ica.fit(epo)
-print(f'ICA fitted on {len(epo)} epochs with {ica.n_components} components')
-fit_msg = f'ICA fitted on {len(epo)} epochs with {ica.n_components} components'
+print(f'ICA fitted on {len(epo)} epochs with {ica.n_components_} components')
+fit_msg = f'ICA fitted on {len(epo)} epochs with {ica.n_components_} components'
 add_info_to_product(product_items, fit_msg, 'success')
 
 # == PRINT EXPLAINED VARIANCE ==
@@ -128,7 +134,7 @@ components_base64.extend(
 
 
 # == PLOT DETAILED COMPONENT PROPERTIES ==
-fs = ica.plot_properties(epo, picks=range(ica.n_components), show=False)
+fs = ica.plot_properties(epo, picks=range(ica.n_components_), show=False)
 for i, f in enumerate(fs):
     comp_fig_path = os.path.join('out_figs', f'component_{i:02d}.png')
     f.savefig(comp_fig_path, dpi=150)
@@ -145,7 +151,7 @@ print(f'Report saved to {report_path}')
 add_image_to_product(product_items, 'ICA Components', base64_data=components_base64[0])
 
 if len(components_base64) > 1:
-    add_info_to_product(product_items, f'Additional ICA components but not shown here. See figures in out_figs/ for all {ica.n_components} components.', msg_type='info')
+    add_info_to_product(product_items, f'Additional ICA components but not shown here. See figures in out_figs/ for all {ica.n_components_} components.', msg_type='info')
     
 add_info_to_product(product_items, 
                     'ICA decomposition successfully computed and saved', 

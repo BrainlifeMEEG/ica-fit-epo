@@ -37,7 +37,7 @@ Brainlife App to compute ICA object using `mne.preprocessing.ICA` and `ica.fit()
 
 *- brainlife.io Publishing and Apps:*
 
-Avesani, P., McPherson, B., Hayashi, S. et al. **The open diffusion data derivatives, brain data upcycling via integrated publishing of derivatives and reproducible open cloud services**. Sci Data 6, 69 (2019). https://doi.org/10.1038/s41597-019-0073-y
+Hayashi, S., Caron, B.A., Heinsfeld, A.S. et al. **brainlife.io: a decentralized and open-source cloud platform to support neuroscience research.** Nature Methods 21, 809–813 (2024). https://doi.org/10.1038/s41592-024-02237-2
 
 *- MNE-Python package:* 
 

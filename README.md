@@ -77,4 +77,6 @@ The number of components should be chosen based on:
 
 Channels are pre-whitened using PCA before ICA fitting. Optional noise covariance can be specified for improved pre-whitening.
 
+## Citation
 
+Hayashi, S., Caron, B.A., Heinsfeld, A.S. et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. Nat Methods 21, 809–813 (2024). https://doi.org/10.1038/s41592-024-02237-2

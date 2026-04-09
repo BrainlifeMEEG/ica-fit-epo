@@ -1,4 +1,6 @@
-/out_**
-/__**
+/in_dir/
+/out_*/
+/__pycache__/
+.gitignore
 /product.json
 /config.json

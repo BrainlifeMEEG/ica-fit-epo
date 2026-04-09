@@ -83,7 +83,7 @@ default_n_components = min(50, total_rank)
 
 # == SET UP ICA ==
 ica_params = {
-    'n_components': config.get('n_components', default_n_components),
+    'n_components': config.get('n_components') or default_n_components,
     'random_state': config.get('random_state'),
     'method': config.get('method'),
 }

@@ -142,7 +142,7 @@ for i, f in enumerate(fs):
 
 # == CREATE REPORT ==
 report = mne.Report(title='ICA Fitting Report (Epochs)')
-report.add_ica(ica, 'ICA Decomposition', inst=epo)
+report.add_ica(ica, 'ICA Decomposition', inst=epo,plot_sources=True)
 report_path = os.path.join('out_report', 'report_ica.html')
 report.save(report_path, overwrite=True)
 print(f'Report saved to {report_path}')

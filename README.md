@@ -1,5 +1,55 @@
 # ICA Fitting on Epoched Data
 
+<!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
+
+> **Fits an ICA decomposition to epoched MEG/EEG data with MNE-Python, with optional pre-filtering, and outputs the ICA solution and an HTML QC report with component plots.**
+
+Fits mne.preprocessing.ICA (fastica, picard or infomax) on the epochs, filtering a copy first when l_freq or h_freq is set, and plots topographies and properties of the components. Use it on epoched data before an ICA-apply App to remove artifact components. n_components defaults to 50 or the data rank, whichever is smaller.
+
+| | |
+|---|---|
+| 📥 **Inputs** | `neuro/meeg/mne/epochs` |
+| 📤 **Outputs** | `neuro/meeg/mne/ica` · `report/html` |
+| 🐳 **Container** | `brainlifemeeg/mne:1.12.1` |
+| ⚙️ **Resources** | 8 CPUs · 20 GB memory · 1 h walltime |
+| 🔗 **Run it** | [doi.org/10.25663/brainlife.app.761](https://doi.org/10.25663/brainlife.app.761) |
+
+#### 📥 Inputs
+
+| Input | Datatype | Required | Description |
+|---|---|---|---|
+| `data` | `neuro/meeg/mne/epochs` | yes | Epoched MEG/EEG data in MNE epochs .fif format. |
+
+#### 📤 Outputs
+
+| Output | Datatype | Description |
+|---|---|---|
+| `out_dir` | `neuro/meeg/mne/ica` | The fitted ICA object. |
+| `out_report` | `report/html` | HTML QC report with the ICA decomposition and component property plots. |
+
+<details>
+<summary><b>⚙️ Parameters</b> (9)</summary>
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `n_components` | number |  | Number of principal components (from the pre-whitening PCA step) that are passed to the ICA algorithm during fitting. If nothing is provided, will default to 50, or the rank of the data, whichever is smallest. |
+| `l_freq` | number |  | Low frequency cut-off for high-pass filtering before ICA. default is None (no high-pass filtering). High-pass filtering is recommended on raw data before running ICA. Notice: the filtered data is not saved. You have to use the filtering app if you want to use filtered data subsequently. |
+| `h_freq` | number |  | High frequency cut-off for low-pass filtering before ICA. default is None (no low-pass filtering). Notice: the filtered data is not saved. You have to use the filtering app if you want to use filtered data subsequently. |
+| `method` | string | `fastica` | The ICA method to use in the fit method. Use the fit_params argument to set additional parameters. Specifically, if you want Extended Infomax, set method='infomax' and fit_params=dict(extended=True) (this also works for method='picard'). Defaults to 'fastica'. |
+| `noise_cov` | string |  | Noise covariance used for pre-whitening. If None (default), channels are scaled to unit variance (“z-standardized”) as a group by channel type prior to the whitening by PCA. |
+| `random_state` | number | `42` | A seed for the NumPy random number generator (RNG). If None (default), the seed will be obtained from the operating system (see RandomState for details), meaning it will most likely produce different output every time this function or method is run. To achieve reproducible results, pass a value here to explicitly initialize the RNG with a defined state. |
+| `max_iter` | string | `auto` | Maximum number of iterations during fit. If 'auto', it will set maximum iterations to 1000 for 'fastica' and to 500 for 'infomax' or 'picard'. The actual number of iterations it took ICA.fit() to complete will be stored in the n_iter_ attribute. |
+| `allow_ref_meg` | boolean | `false` | Allow ICA on MEG reference channels. Defaults to False. |
+| `fit_params` | string |  | Additional parameters passed to the ICA estimator as specified by method. Allowed entries are determined by the various algorithm implementations: see FastICA, picard(), infomax(). |
+
+</details>
+
+📚 **References used by this App:**
+- Hayashi S, Caron BA, Heinsfeld AS, et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. Nat Methods 21:809-813 (2024). [doi:10.1038/s41592-024-02237-2](https://doi.org/10.1038/s41592-024-02237-2)
+- Gramfort A, et al. MEG and EEG data analysis with MNE-Python. Front Neurosci 7:267 (2013). [doi:10.3389/fnins.2013.00267](https://doi.org/10.3389/fnins.2013.00267)
+
+<!-- brainlife-app:end -->
+
 [![Run on Brainlife.io](https://img.shields.io/badge/Brainlife-bl.app.761-blue.svg)](https://doi.org/10.25663/brainlife.app.761)
 
 ## Description
